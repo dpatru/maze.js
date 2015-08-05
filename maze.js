@@ -303,9 +303,12 @@ Maze.prototype.drawSquare = function(ctx, x, delay) {
 	    // console.log("drew "+x);
 	    ctx.fillStyle = WHITE;
 	    ctx.fillRect( i*CELL, j*CELL, CELL, CELL);
-	    
+
 	    ctx.save();
-	    ctx.globalCompositeOperation="darken";
+	    // do this for smooth walls, we don't want the white
+	    // vertical lines to overwrite the dark horizontal lines
+	    // or vice versa.
+	    ctx.globalCompositeOperation="darken"; 
 
 	    // console.log("drawing left side of "+mx+"="+(mx & 1?WHITE:BLACK) );
 	    drawLine(ctx, i*CELL, j*CELL, 0, CELL,
@@ -360,8 +363,9 @@ function go() {
 
 function redraw() { m.redraw(ctx); }
 function draw() { m.draw(ctx); }
-// var _scaled = false;
+
 function scale() {
+    // see http://stackoverflow.com/a/5306929/268040
     if (window.devicePixelRatio > 1) {
 	var canvasWidth = canvas.width;
 	var canvasHeight = canvas.height;
@@ -373,18 +377,6 @@ function scale() {
 	
 	ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
-    // // _scaled = true;
-
-    // if (document.getElementById("scale").checked) {
-    // 	console.log("scaling up");
-    // 	ctx.scale(2,2);
-    // }
-    // else {
-    // 	// ctx.scale(1,1);
-    // 	console.log("resetting transform");
-    // 	ctx.resetTransform()
-    // }
-    // // ctx.save();
     redraw();
 }
 go();
