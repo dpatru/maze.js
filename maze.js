@@ -337,18 +337,19 @@ function makeMaze() {
     // console.log("height "+h, "width "+w);
     m= new Maze(h,w);
     m.strategy();
-    m.draw(c);
+    m.draw(ctx);
 }
-var canvas = document.getElementById('c');
-var c = canvas.getContext('2d');
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
 function go() {
     makeMaze();
     scale();
 }
 
 
-function redraw() { m.redraw(c); }
-function draw() { m.draw(c); }
+function redraw() { m.redraw(ctx); }
+function draw() { m.draw(ctx); }
+// var _scaled = false;
 function scale() {
     if (document.getElementById("scale").checked) {
 	c.scale(2,2);
