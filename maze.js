@@ -324,7 +324,7 @@ Maze.prototype.drawSquare = function(ctx, x, delay) {
 
 
 Maze.prototype.redraw = function (ctx) {
-    this.clear();
+    this.erase();
     this.strategy();
     this.draw(ctx);
 };
@@ -341,16 +341,22 @@ function makeMaze() {
 }
 var canvas = document.getElementById('c');
 var c = canvas.getContext('2d');
-//c.scale(2,2);
 function go() {
-  //c.fillStyle = RED;
-  //c.fillRect (10, 10, 55, 50);
-  //c.fillStyle = "rgba(0, 0, 200, 0.5)";
-  //c.fillRect (30, 30, 55, 50); 
-  makeMaze();
+    makeMaze();
+    scale();
 }
 
 
 function redraw() { m.redraw(c); }
 function draw() { m.draw(c); }
+function scale() {
+    if (document.getElementById("scale").checked) {
+	c.scale(2,2);
+	redraw();
+    }
+    else {
+	c.scale(1,1);
+	redraw();
+    }
+}
 go();

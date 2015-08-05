@@ -9,10 +9,12 @@
   <canvas id="c" width="1000" height="700"></canvas>
   <br><button onclick="redraw(c)">Redraw</button>
   <button onclick="draw(c)">Draw</button>
-<br>  <label>Width <input id="width" value="90" type="number" onchange="makeMaze()"></label>
-<br>  <label>Height <input id="height" value="60" type="number" onchange="makeMaze()"></label>
-<br>  <label>Delay <input id="delay" value=".5" max="1.0" min=".1"
+<label>Width <input id="width" value="90" type="number" onchange="makeMaze()"></label>
+ <label>Height <input id="height" value="60" type="number" onchange="makeMaze()"></label>
+ <label>Delay <input id="delay" value=".5" max="1.0" min=".1"
 step=".1" type="number" onchange="draw()"></label>
+ <label><input id="scale" checked type="checkbox" onclick="scale()">Scale</label>
+
 
 <script src="maze.js"></script>
 </body>
