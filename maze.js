@@ -341,7 +341,7 @@ function makeMaze() {
 }
 var canvas = document.getElementById('c');
 var c = canvas.getContext('2d');
-c.scale(2,2);
+//c.scale(2,2);
 function go() {
   //c.fillStyle = RED;
   //c.fillRect (10, 10, 55, 50);
