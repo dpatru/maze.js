@@ -63,6 +63,7 @@ function Maze(h, w, strategy) {
     this.h = h;
     this.w = w;
     this.m = new Array(h*w);
+    this.timeouts = [];
     this.erase();
     this.strategy = strategy? strategy: this.dfsGraph;
     // this.creationOrder = [];
@@ -70,6 +71,10 @@ function Maze(h, w, strategy) {
 }
 
 Maze.prototype.erase = function() {
+    if (this.timeouts) {
+	this.timeouts.forEach(function(id){clearTimeout(id);});
+    }
+    this.timeouts = []
     for (var i = 0; i < this.h * this.w; i++) {
 	this.m[i] = 0;
     }
@@ -236,7 +241,7 @@ Maze.prototype.dfsGraph = function(start, seen, minCycle) {
 	    var dist = Math.abs(seen[x[1]] - x[2]);
 	    if (dist >= minCycle && randInt(minCycle) == 1) {
 		cycles++;
-		console.log("creating loop "+cycles+" at "+x[0]+" and "+x[1]+", counts are "+seen[x[1]]+" and "+x[2]+", dist = "+dist);
+		// console.log("creating loop "+cycles+" at "+x[0]+" and "+x[1]+", counts are "+seen[x[1]]+" and "+x[2]+", dist = "+dist);
 		this.openPassage(x[1],x[0]);
 	    }
 	    continue;
@@ -274,10 +279,11 @@ Maze.prototype.draw = function (ctx) {
     var maze = this;
     var threadDelay = 50;
     this.dfs(function(x, i){
-	setTimeout(function(){
-	    // console.log("executing "+i+": "+x);
-	    maze.drawSquare(ctx, x, delay*.9);
-	}, (Math.floor(i/threadDelay) + i%threadDelay)*1000*delay);
+	maze.timeouts.push(
+	    setTimeout(function(){
+		// console.log("executing "+i+": "+x);
+		maze.drawSquare(ctx, x, delay*.9);
+	    }, (Math.floor(i/threadDelay) + i%threadDelay)*1000*delay));
     });
 };
 
@@ -292,34 +298,39 @@ Maze.prototype.drawSquare = function(ctx, x, delay) {
     ctx.fillStyle = RED;
     ctx.fillRect( i*CELL, j*CELL, CELL, CELL);
     var maze = this;
-    setTimeout(function() {
-	// console.log("drew "+x);
-	ctx.fillStyle = WHITE;
-	ctx.fillRect( i*CELL, j*CELL, CELL, CELL);
+    maze.timeouts.push(
+	setTimeout(function() {
+	    // console.log("drew "+x);
+	    ctx.fillStyle = WHITE;
+	    ctx.fillRect( i*CELL, j*CELL, CELL, CELL);
+	    
+	    ctx.save();
+	    ctx.globalCompositeOperation="darken";
 
-	// console.log("drawing left side of "+mx+"="+(mx & 1?WHITE:BLACK) );
-	drawLine(ctx, i*CELL, j*CELL, 0, CELL,
-		 (mx & 1)? WHITE: BLACK);
+	    // console.log("drawing left side of "+mx+"="+(mx & 1?WHITE:BLACK) );
+	    drawLine(ctx, i*CELL, j*CELL, 0, CELL,
+		     (mx & 1)? WHITE: BLACK);
+	    
+	    if (i < w-1) {
+		// console.log("drawing right side of "+mx+" ("+maze.m[x+1]+") ="+(maze.m[x+1] & 1?WHITE:BLACK) );
+		drawLine(ctx, (i+1)*CELL, j*CELL, 0, CELL,
+			 (maze.m[x+1] & 1)? WHITE: BLACK);
+	    }
 
-	// console.log("drawing top side of "+mx+"="+(mx & 2?WHITE:BLACK) );
-	drawLine(ctx, i*CELL, j*CELL, CELL, 0,
-		 (mx & 2)? WHITE: BLACK);
-
-	if (i < w-1) {
-	    // console.log("drawing right side of "+mx+" ("+maze.m[x+1]+") ="+(maze.m[x+1] & 1?WHITE:BLACK) );
-	    drawLine(ctx, (i+1)*CELL, j*CELL, 0, CELL,
-		     (maze.m[x+1] & 1)? WHITE: BLACK);
-	}
-	if (j < h-1) {
-	    // console.log("drawing bottom side of "+x+" ("+maze.m[x+w]+") ="+(maze.m[x+w] & 1?WHITE:BLACK) );
-	    drawLine(ctx, i*CELL, (j+1)*CELL, CELL, 0,
-		     (maze.m[x+w] & 2)? WHITE: BLACK);
-	}
-
-	// ctx.textBaseline="top";
-	// ctx.strokeText(mx, i*CELL, j*CELL);
-	
-    }, Math.round(delay*1000)  );
+	    // console.log("drawing top side of "+mx+"="+(mx & 2?WHITE:BLACK) );
+	    drawLine(ctx, i*CELL, j*CELL, CELL, 0,
+		     (mx & 2)? WHITE: BLACK);
+	    
+	    if (j < h-1) {
+		// console.log("drawing bottom side of "+x+" ("+maze.m[x+w]+") ="+(maze.m[x+w] & 1?WHITE:BLACK) );
+		drawLine(ctx, i*CELL, (j+1)*CELL, CELL, 0,
+			 (maze.m[x+w] & 2)? WHITE: BLACK);
+	    }
+	    ctx.restore();
+	    // ctx.textBaseline="top";
+	    // ctx.strokeText(mx, i*CELL, j*CELL);
+	    
+	}, Math.round(delay*1000)  ));
 };
 
 
@@ -351,13 +362,29 @@ function redraw() { m.redraw(ctx); }
 function draw() { m.draw(ctx); }
 // var _scaled = false;
 function scale() {
-    if (document.getElementById("scale").checked) {
-	c.scale(2,2);
-	redraw();
+    if (window.devicePixelRatio > 1) {
+	var canvasWidth = canvas.width;
+	var canvasHeight = canvas.height;
+	
+	canvas.width = canvasWidth * window.devicePixelRatio;
+	canvas.height = canvasHeight * window.devicePixelRatio;
+	canvas.style.width = canvasWidth;
+	canvas.style.height = canvasHeight;
+	
+	ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
-    else {
-	c.scale(1,1);
-	redraw();
-    }
+    // // _scaled = true;
+
+    // if (document.getElementById("scale").checked) {
+    // 	console.log("scaling up");
+    // 	ctx.scale(2,2);
+    // }
+    // else {
+    // 	// ctx.scale(1,1);
+    // 	console.log("resetting transform");
+    // 	ctx.resetTransform()
+    // }
+    // // ctx.save();
+    redraw();
 }
 go();
