@@ -283,7 +283,7 @@ Maze.prototype.draw = function (ctx) {
 	    setTimeout(function(){
 		// console.log("executing "+i+": "+x);
 		maze.drawSquare(ctx, x, delay*.9);
-	    }, (Math.floor(i/threadDelay) + i%threadDelay)*1000*delay));
+	    }, ((i/threadDelay) + i%threadDelay)*1000*delay));
     });
 };
 
